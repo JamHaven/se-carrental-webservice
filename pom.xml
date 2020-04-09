@@ -7,9 +7,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	
-	  <groupId>fh</groupId>
-	  <artifactId>se</artifactId>
-	  <version>0.0.1-SNAPSHOT</version>
+	<groupId>fh</groupId>
+	<artifactId>se</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
 	
 	<dependencies>
 		<dependency>
@@ -69,7 +69,7 @@
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
         
-        		<dependency>
+		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-swagger2</artifactId>
 			<version>2.6.1</version>

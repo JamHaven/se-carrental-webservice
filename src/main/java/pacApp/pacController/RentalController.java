@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import io.swagger.annotations.Api;
+import pacApp.pacData.RentalRepository;
+import pacApp.pacException.RentalNotFoundException;
 import pacApp.pacModel.Car;
 import pacApp.pacModel.Rental;
 
@@ -29,19 +31,19 @@ public class RentalController {
     }
 
     @GetMapping("/rental/{id}")
-    public Car getRental(@PathVariable Long id){
+    public Rental getRental(@PathVariable Long id){
         return this.repository.findById(id)
                 .orElseThrow(() -> new RentalNotFoundException(id));
     }
 
     @GetMapping("/rental/user/{id}")
-    public List<Rental> getRentalForUser(@PathVariable Long id){
+    public Rental getRentalForUser(@PathVariable Long id){
         return this.repository.findById(id)
                 .orElseThrow(() -> new RentalNotFoundException(id));
     }
 
     @PostMapping("/rental")
-    public Car saveCar(@RequestBody Rental newRental){
+    public Rental saveCar(@RequestBody Rental newRental){
         //TODO: check for user object in rental object
         return this.repository.save(newRental);
     }

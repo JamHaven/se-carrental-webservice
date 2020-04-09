@@ -29,11 +29,13 @@ public class AuthenticationController {
         this.authenticationService = authenticationService;
     }
 
+    @CrossOrigin
     @GetMapping("/auth")
     public List<User> getAllUsers(){
         return this.repository.findAll();
     }
 
+    @CrossOrigin
     @RequestMapping(value = "/auth", method = RequestMethod.POST,
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
