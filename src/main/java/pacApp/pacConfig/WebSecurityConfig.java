@@ -1,8 +1,11 @@
 package pacApp.pacConfig;
 
+import org.springframework.http.HttpMethod;
+import org.springframework.security.web.header.writers.StaticHeadersWriter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 import pacApp.pacSecurity.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,34 +42,68 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        //configuration.setAllowedOrigins(Arrays.asList("https://example.com"));
-        configuration.addAllowedOrigin("*");
-        configuration.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE"));
+    public CustomCorsFilter corsFilterBean(){
+        return new CustomCorsFilter();
+    }
+
+    /**
+     * needs HttpSecurity.cors()
+     * @return
+     */
+    /*
+    @Bean(name = "corsConfigurationSource")
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration corsConfig = new CorsConfiguration();
+        corsConfig.applyPermitDefaultValues();
+        corsConfig.addAllowedHeader("Authorization");
+        //corsConfig.setAllowedOrigins(Arrays.asList("https://example.com"));
+        //corsConfig.addAllowedOrigin("*");
+        corsConfig.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","OPTIONS"));
+        corsConfig.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration("/**", corsConfig);
         return source;
-    }
+    } */
+
+    /**
+     * corsFilter() is automatically called
+     * @return
+     */
+    /*
+    @Bean
+    public CorsFilter corsFilter() {
+        CorsConfiguration corsConfig = new CorsConfiguration();
+        corsConfig.applyPermitDefaultValues();
+        corsConfig.addAllowedHeader("Authorization");
+        corsConfig.addAllowedOrigin("*");
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", corsConfig);
+
+        return new CorsFilter(source);
+    } */
 
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
-                .cors().and()
+                //.cors().and()
                 //CSRF is NOT needed because token is invulnerable
                 .csrf().disable()
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
                 //do NOT create session
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .headers().frameOptions().sameOrigin().and()
+                //.headers().addHeaderWriter(new StaticHeadersWriter("Access-Control-Allow-Origin","*")).and()
                 .authorizeRequests()
                 .antMatchers("/auth/**").permitAll()
                 .antMatchers("/registration").permitAll()
                 .antMatchers("/h2-console/*").permitAll()
+                .antMatchers(HttpMethod.OPTIONS).permitAll()
                 .anyRequest().authenticated();
 
         httpSecurity.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
+        httpSecurity.addFilterBefore(corsFilterBean(), JwtAuthenticationTokenFilter.class);
         //disable caching
         httpSecurity.headers().cacheControl();
     }

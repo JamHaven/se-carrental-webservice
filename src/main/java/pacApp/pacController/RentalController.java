@@ -1,5 +1,9 @@
 package pacApp.pacController;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,12 +18,15 @@ import pacApp.pacException.RentalNotFoundException;
 import pacApp.pacModel.Car;
 import pacApp.pacModel.Rental;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@Api(value = "RentalController", description = "Operations pertaining to Cars in Car Management System")
+@Api(value = "RentalController", description = "Operations pertaining to Rentals in Car Rental System")
 public class RentalController {
+
     private final RentalRepository repository;
+    private static final Logger log = LoggerFactory.getLogger(RentalController.class);
 
     public RentalController(RentalRepository repository){
         this.repository = repository;
@@ -27,7 +34,14 @@ public class RentalController {
 
     @GetMapping("/rental")
     public List<Rental> getAllRentals(){
-        return this.repository.findAll();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        log.info(auth.toString());
+        log.info(Boolean.toString(auth.isAuthenticated()));
+        log.info(auth.getName());
+        log.info(auth.getPrincipal().toString());
+
+        return new ArrayList<>();
+        //return this.repository.findAll();
     }
 
     @GetMapping("/rental/{id}")

@@ -1,6 +1,8 @@
 package pacApp.pacSecurity;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -24,9 +26,23 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         if(requestHeader != null && requestHeader.startsWith("Bearer ")){
             String authToken = requestHeader.substring(7);
             JwtAuthentication authentication = new JwtAuthentication(authToken);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            this.updateSecurityContextAuthentication(authentication);
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    protected void updateSecurityContextAuthentication(Authentication authentication){
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        Authentication auth = securityContext.getAuthentication();
+
+        if (auth != null && auth instanceof JwtAuthenticatedProfile) {
+            return;
+        }
+
+        if (auth == null){
+            securityContext.setAuthentication(authentication);
+        }
     }
 }

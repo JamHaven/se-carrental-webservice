@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
+
 @Component
 public class JwtAuthenticationProvider implements AuthenticationProvider {
 
@@ -35,9 +37,16 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
             String token = (String) authentication.getCredentials();
             String username = jwtService.getUsernameFromToken(token);
 
-            return jwtService.validateToken(token)
-                    .map(aBoolean -> new JwtAuthenticatedProfile(username))
-                    .orElseThrow(() -> new JwtAuthenticationException("JWT Token validation failed"));
+            Optional<Boolean> optTokenValidity = jwtService.validateToken(token);
+            if (!optTokenValidity.isPresent()) {
+                throw new JwtAuthenticationException("JWT Token validation failed");
+            }
+
+            if (!optTokenValidity.get()) {
+                throw new JwtAuthenticationException("JWT Token validation failed");
+            }
+
+            return new JwtAuthenticatedProfile(username);
 
         } catch (JwtException ex) {
             log.error(String.format("Invalid JWT Token: %s", ex.getMessage()));
