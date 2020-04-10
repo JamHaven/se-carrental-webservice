@@ -35,14 +35,15 @@ public class LoginController {
     @RequestMapping(value = "/login", method = RequestMethod.POST,
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    //public ResponseEntity<JwtTokenResponse> authenticateUser(@RequestBody User user, HttpServletRequest request){
+   
+	//public ResponseEntity<JwtTokenResponse> authenticateUser(@RequestBody User user, HttpServletRequest request){
 	public String authenticateUser(@RequestBody User user, HttpServletRequest request){		
 		//TODO: check user
+		//cau.setToken(autController.authenticateUser(user)); 
 		cau.setSessionId(request.getSession().getId());
 		cau.setUser(user);		
 		if (user != null)
 			return cau.getSessionId();
-		autController.authenticateUser(user); 
 		return null; 
     }
 	
