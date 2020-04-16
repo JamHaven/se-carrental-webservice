@@ -35,7 +35,6 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         Cookie[] cookies = request.getCookies();
 
         if (cookies == null) {
-            log.info("cookies is null");
             return;
         }
 

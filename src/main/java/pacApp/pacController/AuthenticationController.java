@@ -44,7 +44,7 @@ public class AuthenticationController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity authenticateUser(HttpServletResponse response, @RequestBody User user){
-        log.info("User authentication: " + user.toString());
+        log.info("authenticateUser: " + user.toString());
 
         if (user.getEmail() == null || user.getPassword() == null) {
             throw new AuthenticationForbiddenException();
@@ -78,10 +78,15 @@ public class AuthenticationController {
     @RequestMapping(value = "/logout", method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity logoutUser(HttpServletRequest request, HttpServletResponse response) {
-        log.info("logout");
+        log.info("logoutUser");
 
         String authToken = null;
         Cookie[] cookies = request.getCookies();
+
+        if (cookies == null) {
+            GenericResponse responseBody = new GenericResponse(HttpStatus.BAD_REQUEST.value(), "Token not found");
+            return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+        }
 
         for (Cookie cookie : cookies) {
             if (cookie.getName().equals("token")) {
