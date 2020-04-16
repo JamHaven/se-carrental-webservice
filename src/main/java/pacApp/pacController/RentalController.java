@@ -95,13 +95,13 @@ public class RentalController {
         }
 
         User user = optUser.get();
-        List<Rental> rentals = this.repository.findByUser(user);
+        List<Rental> userRentalList = this.repository.findByUser(user);
 
         Rental rental = null;
 
-        for (Rental r : rentals) {
-            if (r.getId() == id.longValue()) {
-                rental = r;
+        for (Rental userRental : userRentalList) {
+            if (userRental.getId() == id.longValue()) {
+                rental = userRental;
             }
         }
 
@@ -118,7 +118,7 @@ public class RentalController {
     @RequestMapping(value = "/rental", method = RequestMethod.POST,
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity saveCar(@RequestBody Booking booking){
+    public ResponseEntity saveRental(@RequestBody Booking booking){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         if (!(auth instanceof JwtAuthenticatedProfile)) {
@@ -199,7 +199,7 @@ public class RentalController {
     @RequestMapping(value = "/rental/{id}", method = RequestMethod.PUT,
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity updateCar(@RequestBody Booking booking, @PathVariable Long id){
+    public ResponseEntity updateRental(@RequestBody Booking booking, @PathVariable Long id){
         if (booking.getId() != null && booking.getId() != id) {
             GenericResponse response = new GenericResponse(400,"Incorrect rental id");
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
