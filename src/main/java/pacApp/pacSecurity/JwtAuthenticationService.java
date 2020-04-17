@@ -26,12 +26,24 @@ public class JwtAuthenticationService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public JwtTokenResponse generateJwtToken(String email, String password){
+    public String generateJwtToken(String email, String password){
         log.info("generateJwtToken");
         log.info(password);
-        return this.userRepository.findOneByEmail(email)
-                .filter(user -> passwordEncoder.matches(password, user.getPassword()))
-                .map(user -> new JwtTokenResponse(tokenService.generateToken(email)))
-                .orElseThrow(() -> new AuthenticationForbiddenException());
+
+        Optional<User> optionalUser = this.userRepository.findOneByEmail(email);
+
+        if (!optionalUser.isPresent()) {
+            throw new JwtAuthenticationException("incorrect user");
+        }
+
+        User user = optionalUser.get();
+
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new JwtAuthenticationException("incorrect password");
+        }
+
+        String token = tokenService.generateToken(email);
+
+        return token;
     }
 }
