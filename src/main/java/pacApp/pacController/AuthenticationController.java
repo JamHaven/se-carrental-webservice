@@ -59,11 +59,9 @@ public class AuthenticationController {
         optUser.orElseThrow(() -> new AuthenticationForbiddenException());
 
         User savedUser = optUser.get();
-        log.info("User: " + savedUser.toString());
+        log.info("user: " + savedUser.toString());
 
         String token = authenticationService.generateJwtToken(savedUser.getEmail(), user.getPassword());
-
-        log.info("token: " + token);
 
         Cookie tokenCookie = new Cookie("token", token);
         tokenCookie.setHttpOnly(true);
@@ -90,7 +88,6 @@ public class AuthenticationController {
 
         for (Cookie cookie : cookies) {
             if (cookie.getName().equals("token")) {
-                log.info("token: " + cookie.getValue());
                 authToken = cookie.getValue();
                 cookie.setValue("");
                 cookie.setMaxAge(0);
