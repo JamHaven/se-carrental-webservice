@@ -9,6 +9,8 @@ import org.springframework.context.annotation.Configuration;
 import lombok.extern.slf4j.Slf4j;
 import pacApp.pacModel.Car;
 
+import java.util.List;
+
 @Configuration
 @Slf4j
 public class InitTestData {
@@ -17,20 +19,20 @@ public class InitTestData {
   @Bean
   CommandLineRunner initTestDatabase(CarRepository repository) {  
 	    return (args) -> {
-	    	Car car1 = new Car(1L,"Car1");
-	    	car1.setLatitude(48.208998);
-	    	car1.setLongitude(16.373483);
-	    	repository.save(car1);
 
-			Car car2 = new Car(2L, "Car2");
-			car2.setLatitude(48.217627);
-			car2.setLongitude(16.395179);
-			repository.save(car2);
+			CarFactory carFactory = new CarFactory();
+			List<Car> carList = carFactory.buildCars();
 
-			Car car3 = new Car(3L, "Car3");
-			car3.setLatitude(48.158457);
-			car3.setLongitude(16.382779);
-			repository.save(car3);
+			int index = 0;
+			long id = 1L;
+			while (index < (carList.size()/4)*3) {
+				Car car = carList.get(index);
+				car.setId(id);
+				repository.save(car);
+
+				index++;
+				id++;
+			}
 	    };
   }
 }
