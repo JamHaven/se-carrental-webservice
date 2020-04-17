@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
+import pacApp.pacData.CarFactory;
 import pacApp.pacData.CarRepository;
 import pacApp.pacData.RentalRepository;
 import pacApp.pacException.CarNotFoundException;
@@ -41,12 +42,19 @@ public class CarController {
         List<Car> availableCarList = new Vector<Car>();
 
         for (Car car : carList) {
-            boolean isCarAvailable = checkForCarBooking(car);
+            boolean isCarAvailable = this.checkForCarBooking(car);
 
             if (isCarAvailable) {
                 availableCarList.add(car);
             }
         }
+
+        //TODO: duplicate car locations
+
+        //CarFactory carFactory = new CarFactory();
+        //availableCarList = carFactory.randomUpdateCarLocations(availableCarList);
+
+        //availableCarList = this.repository.saveAll(availableCarList);
 
         return availableCarList;
     }
@@ -61,14 +69,14 @@ public class CarController {
 
         Car car = optionalCar.get();
 
-        boolean isCarAvailable = checkForCarBooking(car);
+        boolean isCarAvailable = this.checkForCarBooking(car);
 
         if (!isCarAvailable) {
-            GenericResponse response = new GenericResponse(200, "Car is not available");
-            return new ResponseEntity<>(response, HttpStatus.OK);
+            GenericResponse response = new GenericResponse(HttpStatus.FORBIDDEN.value(), "Car is not available");
+            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
         }
 
-        return new ResponseEntity<>(car, HttpStatus.OK);
+        return new ResponseEntity<>(car, HttpStatus.FORBIDDEN);
     }
 
     @PostMapping("/cars")

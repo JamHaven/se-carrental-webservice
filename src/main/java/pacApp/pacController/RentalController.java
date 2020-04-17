@@ -10,6 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import io.swagger.annotations.Api;
+import pacApp.pacData.CarFactory;
 import pacApp.pacData.CarRepository;
 import pacApp.pacData.RentalRepository;
 import pacApp.pacData.UserRepository;
@@ -86,8 +87,8 @@ public class RentalController {
         }
 
         JwtAuthenticatedProfile authenticatedProfile = (JwtAuthenticatedProfile) auth;
-
         String userEmail = authenticatedProfile.getName();
+
         Optional<User> optUser = this.userRepository.findOneByEmail(userEmail);
 
         if (!optUser.isPresent()){
@@ -128,8 +129,8 @@ public class RentalController {
         }
 
         JwtAuthenticatedProfile authenticatedProfile = (JwtAuthenticatedProfile) auth;
-
         String userEmail = authenticatedProfile.getName();
+
         Optional<User> optUser = this.userRepository.findOneByEmail(userEmail);
 
         if (!optUser.isPresent()){
@@ -214,8 +215,8 @@ public class RentalController {
         }
 
         JwtAuthenticatedProfile authenticatedProfile = (JwtAuthenticatedProfile) auth;
-
         String userEmail = authenticatedProfile.getName();
+
         Optional<User> optUser = this.userRepository.findOneByEmail(userEmail);
 
         if (!optUser.isPresent()){
@@ -266,6 +267,19 @@ public class RentalController {
 
         //TODO: calculate costs
 
+        //update car location
+
+        List<Car> exceptionCarList = this.carRepository.findAll();
+
+        CarFactory carFactory = new CarFactory();
+        Car newCar = carFactory.buildNewRandomCar(exceptionCarList);
+
+        Car rentalCar = rental.getCar();
+        rentalCar.setLatitude(newCar.getLatitude());
+        rentalCar.setLongitude(newCar.getLongitude());
+
+        this.carRepository.save(rentalCar);
+
         //return new ResponseEntity<>(rental, HttpStatus.OK);
         Booking bookingResponse = this.convertRentalToBooking(rental);
 
@@ -292,6 +306,8 @@ public class RentalController {
             Timestamp endDate = rental.getEndDate();
             booking.setEndTime(endDate.getTime() / 1000);
         }
+
+        booking.setPrice(rental.getPrice());
 
         return booking;
     }
