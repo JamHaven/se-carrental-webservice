@@ -14,13 +14,4 @@ public class SoapMarshaller {
 	    marshaller.setContextPath("com.consumingwebservice.wsdl");
 	    return marshaller;
 	  }
-
-	  @Bean
-	  public SoapConvertCurrencyConnector cClient(Jaxb2Marshaller marshaller) {
-		SoapConvertCurrencyConnector client = new SoapConvertCurrencyConnector();
-	    client.setDefaultUri("http://localhost:50923/Service1.svc?wsdl");
-	    client.setMarshaller(marshaller);
-	    client.setUnmarshaller(marshaller);
-	    return client;
-	  }
 }

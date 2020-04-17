@@ -1,53 +1,72 @@
 package pacApp.pacSoapConnector;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
 import org.springframework.ws.soap.client.core.SoapActionCallback;
 
-import com.consumingwebservice.wsdl.ConvertCurrency;
-import com.consumingwebservice.wsdl.ConvertCurrencyResponse;
-import com.consumingwebservice.wsdl.GetCurrencyCodes;
-import com.consumingwebservice.wsdl.GetCurrencyCodesResponse;
+import com.consumingwebservice.wsdl.AuthHeader;
+import com.consumingwebservice.wsdl.ConvertCurrenyRequest;
+import com.consumingwebservice.wsdl.GetCurrencyCodesRequest;
 import com.consumingwebservice.wsdl.ObjectFactory;
+import com.consumingwebservice.wsdl.ResponseOfListOfString;
+import com.consumingwebservice.wsdl.ResponseOfString;
 
 import pacApp.pacSoapConnector.context.SoapMarshaller;
 
+@Service
 public class SoapConvertCurrencyConnector extends WebServiceGatewaySupport {
+	
+	private final String SOAP_SERVICE_URL = "http://localhost:50923/Service1.svc/soap";
+	
+	class CURRENCY_SERVICE_ENDPOINTS{
+		public static final String serviceUrl = "http://localhost:50923/Service1.svc/soap";
+		public static final String getCurrencyCodesUrl = "http://tempuri.org/IService1/GetCurrencyCodes";
+		public static final String convertCurrencyUrl = "http://tempuri.org/IService1/ConvertCurrency";
+	}
 	
 	private void setupMarshaller() {
 		getWebServiceTemplate().setMarshaller(new SoapMarshaller().marshaller());
 		getWebServiceTemplate().setUnmarshaller(new SoapMarshaller().marshaller());		
 	}
-	
-	public GetCurrencyCodesResponse getCurrencyCodesResponse() {
-		try {
-			GetCurrencyCodes request = new GetCurrencyCodes();
-			setupMarshaller();
-			GetCurrencyCodesResponse response = (GetCurrencyCodesResponse) getWebServiceTemplate()
-		        .marshalSendAndReceive("http://localhost:50923/Service1.svc/soap", request,
-		            new SoapActionCallback("http://tempuri.org/IService1/GetCurrencyCodes"));
-			System.out.println("Result: "+response.getGetCurrencyCodesResult().getValue().getString());
-			return response;
-		}catch(Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-	
-	public ConvertCurrencyResponse convertCurrency() {
-		try {
-			ConvertCurrency request = new ConvertCurrency();
-			setupMarshaller();
-			ObjectFactory factory = new ObjectFactory();
-			request.setValue(factory.createConvertCurrencyValue("1"));
-			request.setToCurrency(factory.createConvertCurrencyToCurrency("JPY"));
-			ConvertCurrencyResponse response = (ConvertCurrencyResponse)getWebServiceTemplate()
-					 .marshalSendAndReceive("http://localhost:50923/Service1.svc/soap", request,
-							  new SoapActionCallback("http://tempuri.org/IService1/ConvertCurrency"));
-			System.out.println("Result: "+response.getConvertCurrencyResult().getValue());	
-		}catch(Exception e) {
-			e.printStackTrace();
-		}
 		
+	public List<String> getCurrencyCodesResponse() {
+		try {
+			setupMarshaller();
+			GetCurrencyCodesRequest gccr = new GetCurrencyCodesRequest(); 
+			ResponseOfListOfString responseList = (ResponseOfListOfString)getWebServiceTemplate()
+			        .marshalSendAndReceive(CURRENCY_SERVICE_ENDPOINTS.serviceUrl, gccr,
+				            new SoapActionCallback(CURRENCY_SERVICE_ENDPOINTS.getCurrencyCodesUrl));		
+			System.out.println("Result: "+responseList.getReturnValue().getValue().getString());
+			return responseList.getReturnValue().getValue().getString();
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 	
+	public String convertCurrency(String value, String toCurrency) {
+		setupMarshaller();
+		ObjectFactory factory = new ObjectFactory();
+		ConvertCurrenyRequest ccr = new ConvertCurrenyRequest();
+		ccr.setAutHeader(factory.createConvertCurrenyRequestAutHeader(getRequetsHeader(factory)));
+		ccr.setCcValue(factory.createConvertCurrenyRequestCcValue(value));
+		ccr.setToCurrency(factory.createConvertCurrenyRequestToCurrency(toCurrency));		
+		ResponseOfString response = (ResponseOfString)getWebServiceTemplate()
+				 .marshalSendAndReceive(CURRENCY_SERVICE_ENDPOINTS.serviceUrl, ccr,
+						  new SoapActionCallback(CURRENCY_SERVICE_ENDPOINTS.convertCurrencyUrl));
+		System.out.println(response.getReturnValue().getValue());
+		return response.getReturnValue().getValue();
+	}
+	
+
+	private AuthHeader getRequetsHeader(ObjectFactory factory) {
+		AuthHeader authH = new AuthHeader();
+		final String username = "Admin";
+		final String password = "pa$$w0rd";// todo encrypt		
+		authH.setUsername(factory.createAuthHeaderUsername(username)); 
+		authH.setPassword(factory.createAuthHeaderPassword(password));
+		return authH;
+	}
 }

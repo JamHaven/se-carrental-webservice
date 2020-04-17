@@ -9,7 +9,7 @@ public class TestService implements ISoapTestService {
 	
 	@Override
 	public String runTest() {
-		new SoapConvertCurrencyConnector().getCurrencyCodesResponse();
+		//new SoapConvertCurrencyConnector().getTest();
 		return null;
 	}
 }
