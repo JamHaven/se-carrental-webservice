@@ -1,24 +1,18 @@
 package pacApp.pacSoapConnector;
 import java.util.List;
-
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
 import org.springframework.ws.soap.client.core.SoapActionCallback;
-
 import com.consumingwebservice.wsdl.AuthHeader;
 import com.consumingwebservice.wsdl.ConvertCurrenyRequest;
 import com.consumingwebservice.wsdl.GetCurrencyCodesRequest;
 import com.consumingwebservice.wsdl.ObjectFactory;
 import com.consumingwebservice.wsdl.ResponseOfListOfString;
 import com.consumingwebservice.wsdl.ResponseOfString;
-
 import pacApp.pacSoapConnector.context.SoapMarshaller;
 
 @Service
 public class SoapConvertCurrencyConnector extends WebServiceGatewaySupport {
-	
-	private final String SOAP_SERVICE_URL = "http://localhost:50923/Service1.svc/soap";
 	
 	class CURRENCY_SERVICE_ENDPOINTS{
 		public static final String serviceUrl = "http://localhost:50923/Service1.svc/soap";
@@ -35,10 +29,11 @@ public class SoapConvertCurrencyConnector extends WebServiceGatewaySupport {
 		try {
 			setupMarshaller();
 			GetCurrencyCodesRequest gccr = new GetCurrencyCodesRequest(); 
+			ObjectFactory factory = new ObjectFactory();
+			gccr.setAutHeader(factory.createConvertCurrenyRequestAutHeader(getRequetsHeader(factory)));
 			ResponseOfListOfString responseList = (ResponseOfListOfString)getWebServiceTemplate()
 			        .marshalSendAndReceive(CURRENCY_SERVICE_ENDPOINTS.serviceUrl, gccr,
 				            new SoapActionCallback(CURRENCY_SERVICE_ENDPOINTS.getCurrencyCodesUrl));		
-			System.out.println("Result: "+responseList.getReturnValue().getValue().getString());
 			return responseList.getReturnValue().getValue().getString();
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -56,7 +51,6 @@ public class SoapConvertCurrencyConnector extends WebServiceGatewaySupport {
 		ResponseOfString response = (ResponseOfString)getWebServiceTemplate()
 				 .marshalSendAndReceive(CURRENCY_SERVICE_ENDPOINTS.serviceUrl, ccr,
 						  new SoapActionCallback(CURRENCY_SERVICE_ENDPOINTS.convertCurrencyUrl));
-		System.out.println(response.getReturnValue().getValue());
 		return response.getReturnValue().getValue();
 	}
 	
