@@ -13,7 +13,7 @@ public class Car {
     private long id;
 
     @Column(name = "Type")
-    private String type;
+    private CarType type;
 
     @Column(name = "Latitude")
     private Double latitude;
@@ -23,7 +23,7 @@ public class Car {
 
     public Car(){}
 
-    public Car(long id, String type){
+    public Car(long id, CarType type){
         this.id = id;
         this.type = type;
     }
@@ -36,11 +36,11 @@ public class Car {
         this.id = id;
     }
 
-    public String getType() {
+    public CarType getType() {
         return this.type;
     }
 
-    public void setType(String type){
+    public void setType(CarType type){
         this.type = type;
     }
 

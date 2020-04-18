@@ -22,7 +22,7 @@ public class Rental implements Serializable {
     @Column(name = "EndDate")
     private Timestamp endDate;
 
-    @Column(name = "Price", nullable = false)
+    @Column(name = "Price")
     private BigDecimal price;
 
     @ManyToOne
@@ -57,6 +57,29 @@ public class Rental implements Serializable {
 
     public void setEndDate(Timestamp endDate) {
         this.endDate = endDate;
+
+        if (this.startDate == null || this.car == null) {
+            return;
+        }
+
+        //base price
+
+        long endUnixTime = this.endDate.getTime() / 1000;
+        long startUnixTime = this.startDate.getTime() / 1000;
+
+        long rentalDuration = endUnixTime - startUnixTime;
+        double pricePerSecond = 0.01;
+
+        double price = rentalDuration * pricePerSecond;
+
+        //adjust price based on car
+
+        Car rentalCar = this.car;
+        double multiplier = (rentalCar.getType().ordinal() + 1) * 0.3;
+
+        price *= multiplier;
+
+        this.price = BigDecimal.valueOf(price);
     }
 
     public BigDecimal getPrice() {
