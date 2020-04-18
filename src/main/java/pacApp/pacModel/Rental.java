@@ -75,9 +75,9 @@ public class Rental implements Serializable {
         //adjust price based on car
 
         Car rentalCar = this.car;
-        double multiplier = (rentalCar.getType().ordinal() + 1) * 0.3;
+        double multiplier = rentalCar.getType().getCostMultiplier();
 
-        price *= multiplier;
+        price = price + (price * multiplier);
 
         this.price = BigDecimal.valueOf(price);
     }
