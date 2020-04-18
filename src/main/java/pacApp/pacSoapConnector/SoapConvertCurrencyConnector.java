@@ -15,9 +15,14 @@ import pacApp.pacSoapConnector.context.SoapMarshaller;
 public class SoapConvertCurrencyConnector extends WebServiceGatewaySupport {
 	
 	class CURRENCY_SERVICE_ENDPOINTS{
-		public static final String serviceUrl = "http://localhost:50923/Service1.svc/soap";
-		public static final String getCurrencyCodesUrl = "http://tempuri.org/IService1/GetCurrencyCodes";
-		public static final String convertCurrencyUrl = "http://tempuri.org/IService1/ConvertCurrency";
+		// local Endpoints
+		//public static final String serviceUrl = "http://localhost:50923/Service1.svc/soap";
+		//public static final String getCurrencyCodesUrl = "http://tempuri.org/IService1/GetCurrencyCodes";
+		//public static final String convertCurrencyUrl = "http://tempuri.org/IService1/ConvertCurrency";
+		//TODO: on step 2, map to https, now its not possible  to connect
+		public static final String serviceUrl = "http://currencyconverter.azurewebsites.net/Service.svc/soap";
+		public static final String getCurrencyCodesUrl = "http://tempuri.org/IService/GetCurrencyCodes";
+		public static final String convertCurrencyUrl = "http://tempuri.org/IService/ConvertCurrency";
 	}
 	
 	private void setupMarshaller() {
