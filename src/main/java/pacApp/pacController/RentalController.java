@@ -260,12 +260,13 @@ public class RentalController {
             unixTimestamp = booking.getEndTime();
         }
 
+        //set end date and calculate costs
+        //update rental
+
         Timestamp endDate = new Timestamp(unixTimestamp * 1000);
         rental.setEndDate(endDate);
 
         rental = this.repository.save(rental);
-
-        //TODO: calculate costs
 
         //update car location
 
