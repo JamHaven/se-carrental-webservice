@@ -288,7 +288,7 @@ public class RentalController {
     }
 
     @DeleteMapping("/rental/{id}")
-    public void deleteCar(@PathVariable Long id){
+    public void deleteRental(@PathVariable Long id){
         //TODO: check for super user rights
         //this.repository.deleteById(id);
     }
