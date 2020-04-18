@@ -63,14 +63,9 @@ public class AuthenticationController {
 
         String token = authenticationService.generateJwtToken(savedUser.getEmail(), user.getPassword());
 
-        Cookie tokenCookie = new Cookie("token", token);
-        tokenCookie.setHttpOnly(true);
-        tokenCookie.setSecure(true);
+        JwtTokenResponse tokenResponse = new JwtTokenResponse(token);
 
-        response.addCookie(tokenCookie);
-        GenericResponse genericResponse = new GenericResponse(HttpStatus.OK.value(), "Authentication successful");
-
-        return new ResponseEntity<>(genericResponse, HttpStatus.OK);
+        return new ResponseEntity<>(tokenResponse, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/logout", method = RequestMethod.POST,
@@ -78,27 +73,21 @@ public class AuthenticationController {
     public ResponseEntity logoutUser(HttpServletRequest request, HttpServletResponse response) {
         log.info("logoutUser");
 
-        String authToken = null;
-        Cookie[] cookies = request.getCookies();
+        String authorizationHeader = request.getHeader("Authorization");
 
-        if (cookies == null) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
             GenericResponse responseBody = new GenericResponse(HttpStatus.BAD_REQUEST.value(), "Token not found");
             return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
         }
 
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().equals("token")) {
-                authToken = cookie.getValue();
-                cookie.setValue("");
-                cookie.setMaxAge(0);
-                response.addCookie(cookie);
-            }
-        }
+        String authToken = authorizationHeader.substring(7);
 
         if (authToken == null) {
             GenericResponse responseBody = new GenericResponse(HttpStatus.BAD_REQUEST.value(), "Token not found");
             return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
         }
+
+        //TODO: save token in blacklist
 
         GenericResponse responseBody = new GenericResponse(HttpStatus.OK.value(), "Logout successful");
         return new ResponseEntity<>(responseBody, HttpStatus.OK);
