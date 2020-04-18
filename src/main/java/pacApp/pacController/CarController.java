@@ -76,7 +76,7 @@ public class CarController {
             return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
         }
 
-        return new ResponseEntity<>(car, HttpStatus.FORBIDDEN);
+        return new ResponseEntity<>(car, HttpStatus.OK);
     }
 
     @PostMapping("/cars")
