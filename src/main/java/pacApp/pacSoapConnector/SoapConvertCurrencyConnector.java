@@ -20,7 +20,7 @@ public class SoapConvertCurrencyConnector extends WebServiceGatewaySupport {
 		//public static final String getCurrencyCodesUrl = "http://tempuri.org/IService1/GetCurrencyCodes";
 		//public static final String convertCurrencyUrl = "http://tempuri.org/IService1/ConvertCurrency";
 		//TODO: on step 2, map to https, now its not possible  to connect
-		public static final String serviceUrl = "http://currencyconverter.azurewebsites.net/Service.svc/soap";
+		public static final String serviceUrl = "https://currencyconverter.azurewebsites.net/Service.svc/soap";
 		public static final String getCurrencyCodesUrl = "http://tempuri.org/IService/GetCurrencyCodes";
 		public static final String convertCurrencyUrl = "http://tempuri.org/IService/ConvertCurrency";
 	}
