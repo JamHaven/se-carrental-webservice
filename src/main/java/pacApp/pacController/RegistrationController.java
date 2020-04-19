@@ -4,6 +4,7 @@ import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.commons.validator.routines.RegexValidator;
 import pacApp.pacData.UserRepository;
 import pacApp.pacException.RegistrationBadRequestException;
+import pacApp.pacLogic.Constants;
 import pacApp.pacModel.Currency;
 import pacApp.pacModel.User;
 import pacApp.pacModel.response.GenericResponse;
@@ -32,7 +33,7 @@ public class RegistrationController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GenericResponse> registerUser(@RequestBody User user){
-        log.info("User registration: " + user.toString());
+        log.info("registerUser: " + user.toString());
 
         if (user.getEmail() == null || user.getPassword() == null) {
             throw new RegistrationBadRequestException();
@@ -44,23 +45,27 @@ public class RegistrationController {
         }
 
         Optional<User> optUser = this.repository.findOneByEmail(user.getEmail());
+
         if (optUser.isPresent()){
-            GenericResponse response = new GenericResponse(409,"User already registered");
+            GenericResponse response = new GenericResponse(HttpStatus.CONFLICT.value(),"User already registered");
             return new ResponseEntity<>(response,HttpStatus.CONFLICT);
         }
 
         RegexValidator validator = new RegexValidator("((?=.*[a-z])(?=.*\\d)(?=.*[@#$%])(?=.*[A-Z]).{6,16})");
+
         if(!validator.isValid(user.getPassword())){
             throw new RegistrationBadRequestException();
         }
 
         if (user.getDefaultCurrency() == null) {
-            user.setDefaultCurrency(Currency.USD);
+            user.setDefaultCurrency(Constants.SERVICE_CURRENCY);
         }
+
+        user.setId(null);
 
         this.repository.saveUser(user);
 
-        GenericResponse response = new GenericResponse(200, "User registration successful");
+        GenericResponse response = new GenericResponse(HttpStatus.OK.value(), "User registration successful");
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

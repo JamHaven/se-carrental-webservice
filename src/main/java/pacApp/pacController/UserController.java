@@ -21,7 +21,7 @@ import java.util.Optional;
 @RestController
 public class UserController {
 
-    private static final Logger log = LoggerFactory.getLogger(AuthenticationController.class);
+    private static final Logger log = LoggerFactory.getLogger(UserController.class);
     private final UserRepository repository;
 
     public UserController(UserRepository repository) {
@@ -52,7 +52,6 @@ public class UserController {
 
         UserInfo userInfo = this.convertUserToUserInfo(user);
 
-        GenericResponse response = new GenericResponse(HttpStatus.OK.value(),"Invalid user");
         return new ResponseEntity<>(userInfo, HttpStatus.OK);
     }
 

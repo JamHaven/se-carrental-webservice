@@ -1,6 +1,7 @@
 package pacApp;
 
 import pacApp.pacData.UserRepository;
+import pacApp.pacLogic.Constants;
 import pacApp.pacModel.Currency;
 import pacApp.pacModel.User;
 
@@ -29,10 +30,18 @@ public class ApplicationStartup implements ApplicationListener<ApplicationReadyE
     public void onApplicationEvent(ApplicationReadyEvent event){
         log.info(event.toString());
         //this.repository.deleteAll();
-        User superuser = new User(1L,"admin@carrental.com");
+
+        User superuser = this.repository.findById(1L);
+
+        if (superuser != null) {
+            log.info("superuser: " + superuser.toString());
+            return;
+        }
+
+        superuser = new User(1L,"admin@carrental.com");
         String password = this.passwordEncoder.encode("admin");
         superuser.setPassword(password);
-        superuser.setDefaultCurrency(Currency.USD);
+        superuser.setDefaultCurrency(Constants.SERVICE_CURRENCY);
         //log.info(superuser.toString());
 
         this.repository.saveAndFlush(superuser);
