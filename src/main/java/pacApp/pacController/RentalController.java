@@ -16,14 +16,18 @@ import pacApp.pacData.RentalRepository;
 import pacApp.pacData.UserRepository;
 import pacApp.pacException.AuthenticationForbiddenException;
 import pacApp.pacException.RentalNotFoundException;
+import pacApp.pacLogic.Constants;
 import pacApp.pacModel.Car;
+import pacApp.pacModel.Currency;
 import pacApp.pacModel.Rental;
 import pacApp.pacModel.User;
 import pacApp.pacModel.request.Booking;
 import pacApp.pacModel.response.GenericResponse;
 import pacApp.pacSecurity.JwtAuthenticatedProfile;
+import pacApp.pacSoapConnector.SoapConvertCurrencyConnector;
 
 import java.awt.print.Book;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
@@ -75,6 +79,14 @@ public class RentalController {
             bookings.add(this.convertRentalToBooking(rental));
         }
 
+        if (user.getDefaultCurrency() == Constants.SERVICE_CURRENCY) {
+            return bookings;
+        }
+
+        Currency userCurrency = user.getDefaultCurrency();
+
+        bookings = this.priceConversionForBookings(bookings, userCurrency.name());
+
         return bookings;
     }
 
@@ -113,6 +125,15 @@ public class RentalController {
         }
 
         Booking booking = this.convertRentalToBooking(rental);
+
+        if (user.getDefaultCurrency() == Constants.SERVICE_CURRENCY) {
+            return new ResponseEntity<>(booking, HttpStatus.OK);
+        }
+
+        Currency userCurrency = user.getDefaultCurrency();
+
+        booking = this.priceConversionForBooking(booking, userCurrency.name());
+
         return new ResponseEntity<>(booking, HttpStatus.OK);
     }
 
@@ -284,6 +305,14 @@ public class RentalController {
         //return new ResponseEntity<>(rental, HttpStatus.OK);
         Booking bookingResponse = this.convertRentalToBooking(rental);
 
+        if (user.getDefaultCurrency() == Constants.SERVICE_CURRENCY) {
+            return new ResponseEntity<>(bookingResponse, HttpStatus.OK);
+        }
+
+        Currency userCurrency = user.getDefaultCurrency();
+
+        bookingResponse = this.priceConversionForBooking(bookingResponse, userCurrency.name());
+
         return new ResponseEntity<>(bookingResponse, HttpStatus.OK);
     }
 
@@ -314,5 +343,40 @@ public class RentalController {
         booking.setPrice(rental.getPrice());
 
         return booking;
+    }
+
+    protected Booking priceConversionForBooking(Booking booking, String currency) {
+        Float value = Float.valueOf(booking.getPrice().floatValue());
+
+        Float convertedValue = null;
+
+        SoapConvertCurrencyConnector currencyConnector;
+
+        try {
+            currencyConnector = new SoapConvertCurrencyConnector();
+            convertedValue = currencyConnector.convertCurrency(value, Constants.SERVICE_CURRENCY.name(), currency);
+        } catch (Exception ex) {
+            log.info(ex.getMessage());
+        }
+
+        if (convertedValue == null) {
+            return booking;
+        }
+
+        BigDecimal convertedPrice = BigDecimal.valueOf(convertedValue);
+        booking.setPrice(convertedPrice);
+
+        return booking;
+    }
+
+    protected List<Booking> priceConversionForBookings(List<Booking> bookingList, String currency) {
+        List<Booking> updatedBookingList = new Vector<>();
+
+        for(Booking booking : bookingList) {
+            Booking updatedBooking = this.priceConversionForBooking(booking, currency);
+            updatedBookingList.add(updatedBooking);
+        }
+
+        return updatedBookingList;
     }
 }
