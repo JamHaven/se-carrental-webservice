@@ -110,7 +110,7 @@ public class CarController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         if (!(auth instanceof JwtAuthenticatedProfile)) {
-            GenericResponse response = new GenericResponse(403, "Authentication failure");
+            GenericResponse response = new GenericResponse(HttpStatus.FORBIDDEN.value(), "Authentication failure");
             return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
         }
 
@@ -224,7 +224,7 @@ public class CarController {
 
         try {
             currencyConnector = new SoapConvertCurrencyConnector();
-            convertedValue = currencyConnector.convertCurrency(value, "USD", outputCurrency);
+            convertedValue = currencyConnector.convertCurrency(value, Constants.SERVICE_CURRENCY.name(), outputCurrency);
         } catch (Exception ex) {
             log.info(ex.getMessage());
         }

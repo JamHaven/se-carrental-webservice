@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import pacApp.pacData.RentalRepository;
 import pacApp.pacData.UserRepository;
+import pacApp.pacLogic.Constants;
 import pacApp.pacModel.Rental;
 import pacApp.pacModel.User;
 import pacApp.pacModel.request.PayInfo;
@@ -149,7 +150,7 @@ public class PaymentController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         if (!(auth instanceof JwtAuthenticatedProfile)) {
-            GenericResponse response = new GenericResponse(403, "Authentication failure");
+            GenericResponse response = new GenericResponse(HttpStatus.FORBIDDEN.value(), "Authentication failure");
             return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
         }
 
@@ -229,7 +230,7 @@ public class PaymentController {
         Float convertedValue = null;
 
         try {
-            convertedValue = currencyConnector.convertCurrency(value, "USD", inputCurrency);
+            convertedValue = currencyConnector.convertCurrency(value, Constants.SERVICE_CURRENCY.name(), inputCurrency);
         } catch (Exception ex) {
             log.error(ex.getMessage());
         }
