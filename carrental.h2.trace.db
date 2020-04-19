@@ -1,0 +1,4 @@
+2020-04-12 20:44:20 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax Fehler in SQL Befehl "SELECT * FROM CAR RENTAL CAR[*]"
+Syntax error in SQL statement "SELECT * FROM CAR RENTAL CAR[*]"; SQL statement:
+SELECT * FROM CAR RENTAL CAR [42000-200]
