@@ -89,6 +89,6 @@ public class Car {
 
     @Override
     public String toString() {
-        return String.format("Car[id=%d, type='%s']",id, type);
+        return String.format("Car[id=%d, type='%s']",id, type.name());
     }
 }
