@@ -13,6 +13,7 @@ public class User {
     private long id;
     private String email;
     private String password;
+    private Currency defaultCurrency;
 
     protected User(){}
 
@@ -55,6 +56,14 @@ public class User {
     }
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Currency getDefaultCurrency() {
+        return this.defaultCurrency;
+    }
+
+    public void setDefaultCurrency(Currency currency) {
+        this.defaultCurrency = currency;
     }
 
     @Override

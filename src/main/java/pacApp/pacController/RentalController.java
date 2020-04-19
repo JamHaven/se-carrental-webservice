@@ -288,9 +288,12 @@ public class RentalController {
     }
 
     @DeleteMapping("/rental/{id}")
-    public void deleteRental(@PathVariable Long id){
-        //TODO: check for super user rights
+    public ResponseEntity deleteRental(@PathVariable Long id){
+        //TODO: check for user roles
         //this.repository.deleteById(id);
+
+        GenericResponse response = new GenericResponse(HttpStatus.NOT_FOUND.value(), "Not found");
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     protected Booking convertRentalToBooking(Rental rental) {

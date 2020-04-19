@@ -1,5 +1,7 @@
 package pacApp.pacModel;
 
+import pacApp.pacLogic.Constants;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -68,9 +70,8 @@ public class Rental implements Serializable {
         long startUnixTime = this.startDate.getTime() / 1000;
 
         long rentalDuration = endUnixTime - startUnixTime;
-        double pricePerSecond = 0.01;
 
-        double price = rentalDuration * pricePerSecond;
+        double price = rentalDuration * Constants.PRICE_PER_SECOND;
 
         //adjust price based on car
 
