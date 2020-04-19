@@ -126,7 +126,7 @@
 					<generatePackage>com.consumingwebservice.wsdl</generatePackage>
 					<schemas>
 						<schema>
-							<url>http://currencyconverter.azurewebsites.net/Service.svc?wsdl</url>
+							<url>https://currencyconverter.azurewebsites.net/Service.svc?wsdl</url>
 						</schema>
 					</schemas>
 				</configuration>
