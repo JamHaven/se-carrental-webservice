@@ -8,7 +8,8 @@ import com.consumingwebservice.wsdl.ConvertCurrenyRequest;
 import com.consumingwebservice.wsdl.GetCurrencyCodesRequest;
 import com.consumingwebservice.wsdl.ObjectFactory;
 import com.consumingwebservice.wsdl.ResponseOfListOfString;
-import com.consumingwebservice.wsdl.ResponseOfString;
+//import com.consumingwebservice.wsdl.ResponseOfFloat;
+import com.consumingwebservice.wsdl.ResponseOfSingle;
 import pacApp.pacSoapConnector.context.SoapMarshaller;
 
 @Service
@@ -35,7 +36,7 @@ public class SoapConvertCurrencyConnector extends WebServiceGatewaySupport {
 			this.setupMarshaller();
 			GetCurrencyCodesRequest gccr = new GetCurrencyCodesRequest(); 
 			ObjectFactory factory = new ObjectFactory();
-			gccr.setAutHeader(factory.createConvertCurrenyRequestAutHeader(getRequetsHeader(factory)));
+			gccr.setAutHeader(factory.createConvertCurrenyRequestAutHeader(getRequestHeader(factory)));
 			ResponseOfListOfString responseList = (ResponseOfListOfString)getWebServiceTemplate()
 			        .marshalSendAndReceive(CURRENCY_SERVICE_ENDPOINTS.serviceUrl, gccr,
 				            new SoapActionCallback(CURRENCY_SERVICE_ENDPOINTS.getCurrencyCodesUrl));		
@@ -46,21 +47,33 @@ public class SoapConvertCurrencyConnector extends WebServiceGatewaySupport {
 		return null;
 	}
 	
-	public String convertCurrency(String value, String toCurrency) {
+	public Float convertCurrency(Float value, String fromCurrency, String toCurrency) {
 		this.setupMarshaller();
 		ObjectFactory factory = new ObjectFactory();
 		ConvertCurrenyRequest ccr = new ConvertCurrenyRequest();
-		ccr.setAutHeader(factory.createConvertCurrenyRequestAutHeader(getRequetsHeader(factory)));
-		ccr.setCcValue(factory.createConvertCurrenyRequestCcValue(value));
-		ccr.setToCurrency(factory.createConvertCurrenyRequestToCurrency(toCurrency));		
+		ccr.setAutHeader(factory.createConvertCurrenyRequestAutHeader(getRequestHeader(factory)));
+
+		//ccr.setToCurrency(factory.createConvertCurrenyRequestToCurrency());
+		//ccr.setCcValue(factory.createConvertCurrenyRequestCcValue(value));
+
+		/*
 		ResponseOfString response = (ResponseOfString)getWebServiceTemplate()
 				 .marshalSendAndReceive(CURRENCY_SERVICE_ENDPOINTS.serviceUrl, ccr,
 						  new SoapActionCallback(CURRENCY_SERVICE_ENDPOINTS.convertCurrencyUrl));
 		return response.getReturnValue().getValue();
-	}
-	
+		*/
 
-	private AuthHeader getRequetsHeader(ObjectFactory factory) {
+		ccr.setAmount(value);
+		ccr.setFromCurrency(factory.createConvertCurrenyRequestFromCurrency(fromCurrency));
+		ccr.setToCurrency(factory.createConvertCurrenyRequestToCurrency(toCurrency));
+
+		ResponseOfSingle response = (ResponseOfSingle) getWebServiceTemplate().marshalSendAndReceive(CURRENCY_SERVICE_ENDPOINTS.serviceUrl, ccr,
+						new SoapActionCallback(CURRENCY_SERVICE_ENDPOINTS.convertCurrencyUrl));
+
+		return response.getReturnValue();
+	}
+
+	private AuthHeader getRequestHeader(ObjectFactory factory) {
 		AuthHeader authH = new AuthHeader();
 		final String username = "Admin";
 		final String password = "pa$$w0rd";// todo encrypt		

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import pacApp.pacData.RentalRepository;
 import pacApp.pacData.UserRepository;
+import pacApp.pacModel.Rental;
 import pacApp.pacModel.User;
 import pacApp.pacModel.request.PayInfo;
 import pacApp.pacModel.response.GenericResponse;
@@ -61,6 +62,8 @@ public class PaymentController {
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
+        currencyCodeList.add("EUR");
+
         return new ResponseEntity<>(currencyCodeList, HttpStatus.OK);
     }
 
@@ -70,6 +73,13 @@ public class PaymentController {
     public ResponseEntity payInfo(@RequestBody PayInfo payInfo) {
         if (payInfo == null) {
             GenericResponse response = new GenericResponse(HttpStatus.BAD_REQUEST.value(), "Missing request body");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        //check for input price
+
+        if (payInfo.getInputPrice() == null) {
+            GenericResponse response = new GenericResponse(HttpStatus.BAD_REQUEST.value(), "Missing input price");
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
@@ -103,26 +113,26 @@ public class PaymentController {
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
-        String conversionRateResponse = null;
+        Float conversionResponse = null;
+
+        Float value = Float.valueOf(payInfo.getInputPrice().floatValue());
 
         try {
-            conversionRateResponse = currencyConnector.convertCurrency("2.61", inputCurrency);
+            conversionResponse = currencyConnector.convertCurrency(value, inputCurrency, outputCurrency);
         } catch (Exception ex) {
             log.error(ex.getMessage());
         }
 
-        if (conversionRateResponse == null) {
+        if (conversionResponse == null) {
             GenericResponse response = new GenericResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Currency conversion error");
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        //log.info(conversionRateResponse);
+        log.info(conversionResponse.toString());
+        Double convertedPrice = Double.valueOf(conversionResponse);
+        log.info(convertedPrice.toString());
 
-        Double conversionRate = Double.valueOf(conversionRateResponse);
-        log.info(conversionRate.toString());
-
-        Double price = payInfo.getInputPrice() * conversionRate;
-        payInfo.setOutputPrice(price);
+        payInfo.setOutputPrice(convertedPrice);
 
         return new ResponseEntity<>(payInfo, HttpStatus.OK);
     }
@@ -155,6 +165,97 @@ public class PaymentController {
 
         User user = optUser.get();
 
-        return null;
+        //check for rental id
+
+        if (payInfo.getRentalId() == null) {
+            GenericResponse response = new GenericResponse(HttpStatus.BAD_REQUEST.value(), "Missing rental id");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        Long rentalId = payInfo.getRentalId();
+
+        Optional<Rental> optionalRental = this.rentalRepository.findById(rentalId);
+
+        if (!optionalRental.isPresent()) {
+            GenericResponse response = new GenericResponse(HttpStatus.BAD_REQUEST.value(),"Rental not found");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        Rental rental = optionalRental.get();
+
+        //check rental user and request user
+
+        if (rental.getUser().getId() != user.getId()) {
+            GenericResponse response = new GenericResponse(HttpStatus.FORBIDDEN.value(),"Rental payment forbidden");
+            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+        }
+
+        SoapConvertCurrencyConnector currencyConnector = null;
+        List<String> currencyCodeList = null;
+
+        try {
+            currencyConnector = new SoapConvertCurrencyConnector();
+            currencyCodeList = currencyConnector.getCurrencyCodesResponse();
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
+        }
+
+        if (currencyCodeList == null) {
+            GenericResponse response = new GenericResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Currency conversion unavailable");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        currencyCodeList.add("EUR");
+
+        String inputCurrency = payInfo.getInputCurrency();
+        String outputCurrency = payInfo.getOutputCurrency();
+
+        if (!currencyCodeList.contains(inputCurrency)) {
+            GenericResponse response = new GenericResponse(HttpStatus.BAD_REQUEST.value(),"Invalid input currency " + inputCurrency);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        if (!currencyCodeList.contains(outputCurrency)) {
+            GenericResponse response = new GenericResponse(HttpStatus.BAD_REQUEST.value(),"Invalid output currency " + outputCurrency);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        if (rental.getPrice() == null) {
+            GenericResponse response = new GenericResponse(HttpStatus.BAD_REQUEST.value(),"Rental not finished");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        Float value = Float.valueOf(rental.getPrice().floatValue());
+        Float convertedValue = null;
+
+        try {
+            convertedValue = currencyConnector.convertCurrency(value, "USD", inputCurrency);
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
+        }
+
+        if (convertedValue == null) {
+            GenericResponse response = new GenericResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Currency conversion error");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        try {
+            convertedValue = currencyConnector.convertCurrency(convertedValue, inputCurrency, outputCurrency);
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
+        }
+
+        if (convertedValue == null) {
+            GenericResponse response = new GenericResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Currency conversion error");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        log.info(convertedValue.toString());
+        Double convertedPrice = Double.valueOf(convertedValue);
+        log.info(convertedPrice.toString());
+
+        payInfo.setOutputPrice(convertedPrice);
+
+        return new ResponseEntity<>(payInfo, HttpStatus.OK);
     }
 }
