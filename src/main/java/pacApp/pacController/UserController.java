@@ -61,7 +61,7 @@ public class UserController {
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity updateUser(@RequestBody UserInfo userInfo) {
         if (userInfo == null) {
-            GenericResponse response = new GenericResponse(400, "Incorrect rental id");
+            GenericResponse response = new GenericResponse(400, "Missing request body");
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
