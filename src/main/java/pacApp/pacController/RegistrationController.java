@@ -4,6 +4,7 @@ import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.commons.validator.routines.RegexValidator;
 import pacApp.pacData.UserRepository;
 import pacApp.pacException.RegistrationBadRequestException;
+import pacApp.pacModel.Currency;
 import pacApp.pacModel.User;
 import pacApp.pacModel.response.GenericResponse;
 
@@ -51,6 +52,10 @@ public class RegistrationController {
         RegexValidator validator = new RegexValidator("((?=.*[a-z])(?=.*\\d)(?=.*[@#$%])(?=.*[A-Z]).{6,16})");
         if(!validator.isValid(user.getPassword())){
             throw new RegistrationBadRequestException();
+        }
+
+        if (user.getDefaultCurrency() == null) {
+            user.setDefaultCurrency(Currency.USD);
         }
 
         this.repository.saveUser(user);
