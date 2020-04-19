@@ -52,7 +52,6 @@ public class UserController {
 
         UserInfo userInfo = this.convertUserToUserInfo(user);
 
-        GenericResponse response = new GenericResponse(HttpStatus.OK.value(),"Invalid user");
         return new ResponseEntity<>(userInfo, HttpStatus.OK);
     }
 

@@ -8,10 +8,10 @@ import pacApp.pacSoapConnector.SoapConvertCurrencyConnector;
 
 @Configuration
 public class SoapMarshaller {
-	  @Bean
-	  public Jaxb2Marshaller marshaller() {
-	    Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
+	@Bean
+	public Jaxb2Marshaller marshaller() {
+	  	Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
 	    marshaller.setContextPath("com.consumingwebservice.wsdl");
 	    return marshaller;
-	  }
+	}
 }

@@ -14,7 +14,7 @@ import pacApp.pacSoapConnector.context.SoapMarshaller;
 @Service
 public class SoapConvertCurrencyConnector extends WebServiceGatewaySupport {
 	
-	class CURRENCY_SERVICE_ENDPOINTS{
+	class CURRENCY_SERVICE_ENDPOINTS {
 		// local Endpoints
 		//public static final String serviceUrl = "http://localhost:50923/Service1.svc/soap";
 		//public static final String getCurrencyCodesUrl = "http://tempuri.org/IService1/GetCurrencyCodes";
@@ -32,7 +32,7 @@ public class SoapConvertCurrencyConnector extends WebServiceGatewaySupport {
 		
 	public List<String> getCurrencyCodesResponse() {
 		try {
-			setupMarshaller();
+			this.setupMarshaller();
 			GetCurrencyCodesRequest gccr = new GetCurrencyCodesRequest(); 
 			ObjectFactory factory = new ObjectFactory();
 			gccr.setAutHeader(factory.createConvertCurrenyRequestAutHeader(getRequetsHeader(factory)));
@@ -40,14 +40,14 @@ public class SoapConvertCurrencyConnector extends WebServiceGatewaySupport {
 			        .marshalSendAndReceive(CURRENCY_SERVICE_ENDPOINTS.serviceUrl, gccr,
 				            new SoapActionCallback(CURRENCY_SERVICE_ENDPOINTS.getCurrencyCodesUrl));		
 			return responseList.getReturnValue().getValue().getString();
-		}catch(Exception e) {
+		} catch(Exception e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
 	
 	public String convertCurrency(String value, String toCurrency) {
-		setupMarshaller();
+		this.setupMarshaller();
 		ObjectFactory factory = new ObjectFactory();
 		ConvertCurrenyRequest ccr = new ConvertCurrenyRequest();
 		ccr.setAutHeader(factory.createConvertCurrenyRequestAutHeader(getRequetsHeader(factory)));
