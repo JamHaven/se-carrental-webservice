@@ -1,6 +1,7 @@
 package pacApp.pacModel;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 @Table(name = "Car")
@@ -12,7 +13,7 @@ public class Car {
     private long id;
 
     @Column(name = "Type")
-    private String type;
+    private CarType type;
 
     @Column(name = "Latitude")
     private Double latitude;
@@ -20,9 +21,9 @@ public class Car {
     @Column(name = "Longitude")
     private Double longitude;
 
-    protected Car(){}
+    public Car(){}
 
-    public Car(long id, String type){
+    public Car(long id, CarType type){
         this.id = id;
         this.type = type;
     }
@@ -31,15 +32,15 @@ public class Car {
         return this.id;
     }
 
-    public void setId(Long id){
+    public void setId(long id){
         this.id = id;
     }
 
-    public String getType() {
+    public CarType getType() {
         return this.type;
     }
 
-    public void setType(String type){
+    public void setType(CarType type){
         this.type = type;
     }
 
@@ -57,6 +58,33 @@ public class Car {
 
     public void setLongitude(Double longitude) {
         this.longitude = longitude;
+    }
+
+    public boolean equalLocation(Car car) {
+        return this.latitude == car.latitude && this.longitude == car.longitude;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Car)) return false;
+        Car car = (Car) o;
+
+        if ((this.id == 0 && car.id != 0) || (this.id != 0 && car.id == 0)) {
+            return Objects.equals(type, car.type) &&
+                    Objects.equals(latitude, car.latitude) &&
+                    Objects.equals(longitude, car.longitude);
+        }
+
+        return this.id == car.id &&
+                Objects.equals(type, car.type) &&
+                Objects.equals(latitude, car.latitude) &&
+                Objects.equals(longitude, car.longitude);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, type, latitude, longitude);
     }
 
     @Override

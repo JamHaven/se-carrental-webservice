@@ -1,6 +1,7 @@
 package pacApp;
 
 import pacApp.pacData.UserRepository;
+import pacApp.pacModel.Currency;
 import pacApp.pacModel.User;
 
 import org.slf4j.Logger;
@@ -31,6 +32,7 @@ public class ApplicationStartup implements ApplicationListener<ApplicationReadyE
         User superuser = new User(1L,"admin@carrental.com");
         String password = this.passwordEncoder.encode("admin");
         superuser.setPassword(password);
+        superuser.setDefaultCurrency(Currency.USD);
         //log.info(superuser.toString());
 
         this.repository.saveAndFlush(superuser);
