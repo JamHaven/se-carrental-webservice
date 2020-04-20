@@ -1,11 +1,14 @@
 package pacApp.pacController;
 
 import org.apache.commons.validator.routines.EmailValidator;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import pacApp.pacData.UserRepository;
 import pacApp.pacException.AuthenticationForbiddenException;
 import pacApp.pacModel.User;
 import pacApp.pacModel.response.GenericResponse;
 import pacApp.pacModel.response.JwtTokenResponse;
+import pacApp.pacSecurity.JwtAuthenticatedProfile;
 import pacApp.pacSecurity.JwtAuthenticationService;
 
 import org.slf4j.Logger;
@@ -35,8 +38,39 @@ public class AuthenticationController {
 
     @CrossOrigin
     @GetMapping("/auth")
-    public List<User> getAllUsers(){
-        return this.repository.findAll();
+    public ResponseEntity getAllUsers(){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(auth instanceof JwtAuthenticatedProfile)) {
+            //throw new AuthenticationForbiddenException("authentication failure");
+            GenericResponse response = new GenericResponse(HttpStatus.FORBIDDEN.value(),"Authentication failure");
+            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+        }
+
+        JwtAuthenticatedProfile authenticatedProfile = (JwtAuthenticatedProfile) auth;
+        String userEmail = authenticatedProfile.getName();
+
+        Optional<User> optUser = this.repository.findOneByEmail(userEmail);
+
+        if (!optUser.isPresent()) {
+            GenericResponse response = new GenericResponse(HttpStatus.BAD_REQUEST.value(),"Invalid user");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        User user = optUser.get();
+
+        //TODO: implement user roles
+
+        long userId = user.getId();
+
+        if (userId != 1L) {
+            GenericResponse response = new GenericResponse(HttpStatus.FORBIDDEN.value(),"Request forbidden");
+            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+        }
+
+        List<User> users = this.repository.findAll();
+
+        return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
     @CrossOrigin
@@ -51,6 +85,7 @@ public class AuthenticationController {
         }
 
         EmailValidator emailValidator = EmailValidator.getInstance();
+
         if (!emailValidator.isValid(user.getEmail())) {
             throw new AuthenticationForbiddenException();
         }

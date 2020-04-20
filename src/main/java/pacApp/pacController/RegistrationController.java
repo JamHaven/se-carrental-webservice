@@ -40,6 +40,7 @@ public class RegistrationController {
         }
 
         EmailValidator emailValidator = EmailValidator.getInstance();
+
         if (!emailValidator.isValid(user.getEmail())) {
             throw new RegistrationBadRequestException();
         }
@@ -61,7 +62,7 @@ public class RegistrationController {
             user.setDefaultCurrency(Constants.SERVICE_CURRENCY);
         }
 
-        user.setId(null);
+        user.setId(0L);
 
         this.repository.saveUser(user);
 

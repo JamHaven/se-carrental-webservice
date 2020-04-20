@@ -89,7 +89,7 @@ public class CarController {
         Currency userDefaultCurrency = user.getDefaultCurrency();
         log.info(userDefaultCurrency.toString());
 
-        if (userDefaultCurrency == Currency.USD) {
+        if (userDefaultCurrency == Constants.SERVICE_CURRENCY) {
             return new ResponseEntity<>(carInfoList, HttpStatus.OK);
         }
 
@@ -146,7 +146,7 @@ public class CarController {
         Currency userDefaultCurrency = user.getDefaultCurrency();
         log.info(userDefaultCurrency.toString());
 
-        if (userDefaultCurrency == Currency.USD) {
+        if (userDefaultCurrency == Constants.SERVICE_CURRENCY) {
             return new ResponseEntity<>(carInfo, HttpStatus.OK);
         }
 
@@ -156,28 +156,134 @@ public class CarController {
     }
 
     @PostMapping("/cars")
-    public Car saveCar(@RequestBody Car car){
-        return this.repository.save(car);
+    public ResponseEntity saveCar(@RequestBody Car car){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(auth instanceof JwtAuthenticatedProfile)) {
+            //throw new AuthenticationForbiddenException("authentication failure");
+            GenericResponse response = new GenericResponse(HttpStatus.FORBIDDEN.value(),"Authentication failure");
+            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+        }
+
+        JwtAuthenticatedProfile authenticatedProfile = (JwtAuthenticatedProfile) auth;
+        String userEmail = authenticatedProfile.getName();
+
+        Optional<User> optUser = this.userRepository.findOneByEmail(userEmail);
+
+        if (!optUser.isPresent()) {
+            GenericResponse response = new GenericResponse(HttpStatus.BAD_REQUEST.value(),"Invalid user");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        User user = optUser.get();
+
+        //TODO: implement user roles
+
+        long userId = user.getId();
+
+        if (userId != 1L) {
+            GenericResponse response = new GenericResponse(HttpStatus.FORBIDDEN.value(),"Request forbidden");
+            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+        }
+
+        Car newCar = this.repository.save(car);
+
+        return new ResponseEntity<>(newCar, HttpStatus.CREATED);
     }
 
     @PutMapping("/cars/{id}")
-    public Car updateCar(@RequestBody Car newCar, @PathVariable Long id){
-        return this.repository.findById(id).map(car -> {
-            car.setType(newCar.getType());
-            return this.repository.save(car);
-        }).orElseGet(() -> {
-            newCar.setId(id);
-            return repository.save(newCar);
-        });
+    public ResponseEntity updateCar(@RequestBody Car newCar, @PathVariable Long id){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(auth instanceof JwtAuthenticatedProfile)) {
+            //throw new AuthenticationForbiddenException("authentication failure");
+            GenericResponse response = new GenericResponse(HttpStatus.FORBIDDEN.value(),"Authentication failure");
+            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+        }
+
+        JwtAuthenticatedProfile authenticatedProfile = (JwtAuthenticatedProfile) auth;
+        String userEmail = authenticatedProfile.getName();
+
+        Optional<User> optUser = this.userRepository.findOneByEmail(userEmail);
+
+        if (!optUser.isPresent()) {
+            GenericResponse response = new GenericResponse(HttpStatus.BAD_REQUEST.value(),"Invalid user");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        User user = optUser.get();
+
+        //TODO: implement user roles
+
+        long userId = user.getId();
+
+        if (userId != 1L) {
+            GenericResponse response = new GenericResponse(HttpStatus.FORBIDDEN.value(),"Request forbidden");
+            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+        }
+
+        Optional<Car> optionalCar = this.repository.findById(id);
+
+        if (!optionalCar.isPresent()) {
+            newCar.setId(id.longValue());
+
+            newCar = this.repository.save(newCar);
+
+            return new ResponseEntity<>(newCar, HttpStatus.OK);
+        }
+
+        Car car = optionalCar.get();
+        car.setType(newCar.getType());
+        car.setLatitude(newCar.getLatitude());
+        car.setLongitude(newCar.getLongitude());
+
+        car = this.repository.save(car);
+
+        return new ResponseEntity<>(car, HttpStatus.OK);
     }
 
     @DeleteMapping("/cars/{id}")
     public ResponseEntity deleteCar(@PathVariable Long id){
-        //TODO: check for user role
-        //this.repository.deleteById(id);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        GenericResponse response = new GenericResponse(HttpStatus.NOT_FOUND.value(), "Not found");
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        if (!(auth instanceof JwtAuthenticatedProfile)) {
+            //throw new AuthenticationForbiddenException("authentication failure");
+            GenericResponse response = new GenericResponse(HttpStatus.FORBIDDEN.value(),"Authentication failure");
+            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+        }
+
+        JwtAuthenticatedProfile authenticatedProfile = (JwtAuthenticatedProfile) auth;
+        String userEmail = authenticatedProfile.getName();
+
+        Optional<User> optUser = this.userRepository.findOneByEmail(userEmail);
+
+        if (!optUser.isPresent()) {
+            GenericResponse response = new GenericResponse(HttpStatus.BAD_REQUEST.value(),"Invalid user");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        User user = optUser.get();
+
+        //TODO: implement user roles
+
+        long userId = user.getId();
+
+        if (userId != 1L) {
+            GenericResponse response = new GenericResponse(HttpStatus.FORBIDDEN.value(),"Request forbidden");
+            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+        }
+
+        Optional<Car> optionalCar = this.repository.findById(id);
+
+        if (!optionalCar.isPresent()) {
+            GenericResponse response = new GenericResponse(HttpStatus.NOT_FOUND.value(), "Car " + id.toString() + " not found");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+
+        this.repository.deleteById(id);
+
+        GenericResponse response = new GenericResponse(HttpStatus.OK.value(), "Car " + id.toString() + " deleted");
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     protected boolean checkForCarBooking(Car car) {

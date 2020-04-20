@@ -17,9 +17,8 @@ public class WebServerMachine {
 	}
 
 	public static void main(String... args) {
-		    SpringApplication.run(WebServerMachine.class, args);
-		    new SoapConvertCurrencyConnector().getCurrencyCodesResponse();
-		    //new SoapConvertCurrencyConnector().convertCurrency("3", "JPY");
-			new SoapConvertCurrencyConnector().convertCurrency(3.00F, "USD", "EUR");
-	}	 
+		SpringApplication.run(WebServerMachine.class, args);
+		new SoapConvertCurrencyConnector().getCurrencyCodesResponse();
+		new SoapConvertCurrencyConnector().convertCurrency(3.00F, "USD", "EUR");
+	}
 }
