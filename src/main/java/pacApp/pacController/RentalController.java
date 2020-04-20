@@ -63,15 +63,16 @@ public class RentalController {
         log.info(auth.getPrincipal().toString());
 
         JwtAuthenticatedProfile authenticatedProfile = (JwtAuthenticatedProfile) auth;
-
         String userEmail = authenticatedProfile.getName();
+
         Optional<User> optUser = this.userRepository.findOneByEmail(userEmail);
 
-        if (!optUser.isPresent()){
+        if (!optUser.isPresent()) {
             throw new AuthenticationForbiddenException("authentication failure");
         }
 
         User user = optUser.get();
+
         List<Rental> rentals = this.repository.findByUser(user);
         List<Booking> bookings = new Vector<Booking>();
 
@@ -79,11 +80,11 @@ public class RentalController {
             bookings.add(this.convertRentalToBooking(rental));
         }
 
-        if (user.getDefaultCurrency() == Constants.SERVICE_CURRENCY) {
+        Currency userCurrency = user.getDefaultCurrency();
+
+        if (userCurrency == Constants.SERVICE_CURRENCY) {
             return bookings;
         }
-
-        Currency userCurrency = user.getDefaultCurrency();
 
         bookings = this.priceConversionForBookings(bookings, userCurrency.name());
 
@@ -103,7 +104,7 @@ public class RentalController {
 
         Optional<User> optUser = this.userRepository.findOneByEmail(userEmail);
 
-        if (!optUser.isPresent()){
+        if (!optUser.isPresent()) {
             throw new AuthenticationForbiddenException("authentication failure");
         }
 
@@ -126,11 +127,11 @@ public class RentalController {
 
         Booking booking = this.convertRentalToBooking(rental);
 
-        if (user.getDefaultCurrency() == Constants.SERVICE_CURRENCY) {
+        Currency userCurrency = user.getDefaultCurrency();
+
+        if (userCurrency == Constants.SERVICE_CURRENCY) {
             return new ResponseEntity<>(booking, HttpStatus.OK);
         }
-
-        Currency userCurrency = user.getDefaultCurrency();
 
         booking = this.priceConversionForBooking(booking, userCurrency.name());
 
@@ -240,7 +241,7 @@ public class RentalController {
 
         Optional<User> optUser = this.userRepository.findOneByEmail(userEmail);
 
-        if (!optUser.isPresent()){
+        if (!optUser.isPresent()) {
             GenericResponse response = new GenericResponse(400,"Invalid user");
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
@@ -305,11 +306,11 @@ public class RentalController {
         //return new ResponseEntity<>(rental, HttpStatus.OK);
         Booking bookingResponse = this.convertRentalToBooking(rental);
 
-        if (user.getDefaultCurrency() == Constants.SERVICE_CURRENCY) {
+        Currency userCurrency = user.getDefaultCurrency();
+
+        if (userCurrency == Constants.SERVICE_CURRENCY) {
             return new ResponseEntity<>(bookingResponse, HttpStatus.OK);
         }
-
-        Currency userCurrency = user.getDefaultCurrency();
 
         bookingResponse = this.priceConversionForBooking(bookingResponse, userCurrency.name());
 
@@ -318,11 +319,46 @@ public class RentalController {
 
     @DeleteMapping("/rental/{id}")
     public ResponseEntity deleteRental(@PathVariable Long id){
-        //TODO: check for user roles
-        //this.repository.deleteById(id);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        GenericResponse response = new GenericResponse(HttpStatus.NOT_FOUND.value(), "Not found");
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        if (!(auth instanceof JwtAuthenticatedProfile)) {
+            //throw new AuthenticationForbiddenException("authentication failure");
+            GenericResponse response = new GenericResponse(HttpStatus.FORBIDDEN.value(),"Authentication failure");
+            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+        }
+
+        JwtAuthenticatedProfile authenticatedProfile = (JwtAuthenticatedProfile) auth;
+        String userEmail = authenticatedProfile.getName();
+
+        Optional<User> optUser = this.userRepository.findOneByEmail(userEmail);
+
+        if (!optUser.isPresent()) {
+            GenericResponse response = new GenericResponse(HttpStatus.BAD_REQUEST.value(),"Invalid user");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        User user = optUser.get();
+
+        //TODO: implement user roles
+
+        long userId = user.getId();
+
+        if (userId != 1L) {
+            GenericResponse response = new GenericResponse(HttpStatus.FORBIDDEN.value(),"Request forbidden");
+            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+        }
+
+        Optional<Rental> optionalRental = this.repository.findById(id);
+
+        if (!optionalRental.isPresent()) {
+            GenericResponse response = new GenericResponse(HttpStatus.NOT_FOUND.value(), "Rental " + id.toString() + " not found");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+
+        this.repository.deleteById(id);
+
+        GenericResponse response = new GenericResponse(HttpStatus.OK.value(),"Rental " + id.toString() + " deleted");
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     protected Booking convertRentalToBooking(Rental rental) {
@@ -346,8 +382,11 @@ public class RentalController {
     }
 
     protected Booking priceConversionForBooking(Booking booking, String currency) {
-        Float value = Float.valueOf(booking.getPrice().floatValue());
+        if (booking.getPrice() == null) {
+            return booking;
+        }
 
+        Float value = Float.valueOf(booking.getPrice().floatValue());
         Float convertedValue = null;
 
         SoapConvertCurrencyConnector currencyConnector;
@@ -356,7 +395,7 @@ public class RentalController {
             currencyConnector = new SoapConvertCurrencyConnector();
             convertedValue = currencyConnector.convertCurrency(value, Constants.SERVICE_CURRENCY.name(), currency);
         } catch (Exception ex) {
-            log.info(ex.getMessage());
+            log.error(ex.getMessage());
         }
 
         if (convertedValue == null) {

@@ -1,10 +1,11 @@
 package pacApp.pacModel;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 @Table(name = "User")
-public class User {
+public class User implements Cloneable {
 
     @Id
     //@GeneratedValue(strategy = GenerationType.AUTO)
@@ -40,7 +41,7 @@ public class User {
     public long getId() {
         return this.id;
     }
-    public void setId(Long id){
+    public void setId(long id){
         this.id = id;
     }
 
@@ -67,7 +68,31 @@ public class User {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof User)) return false;
+        User user = (User) o;
+        return id == user.id &&
+                Objects.equals(email, user.email) &&
+                Objects.equals(password, user.password) &&
+                defaultCurrency == user.defaultCurrency;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, email, password, defaultCurrency);
+    }
+
+    @Override
     public String toString() {
         return String.format("User[id=%d, email='%s', password='%s']",id , email, password);
     }
+
+    //Cloneable
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
+
 }
