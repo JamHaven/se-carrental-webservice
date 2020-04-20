@@ -75,7 +75,11 @@
 			<version>2.6.1</version>
 			<scope>compile</scope>
 		</dependency>
-
+		<dependency>
+			<groupId>org.jvnet.jaxb2.maven2</groupId>
+			<artifactId>maven-jaxb2-plugin</artifactId>
+			<version>0.12.3</version>
+		</dependency>
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-swagger-ui</artifactId>
@@ -123,7 +127,7 @@
 				</executions>
 				<configuration>
 					<schemaLanguage>WSDL</schemaLanguage>
-					<generatePackage>com.consumingwebservice.wsdl</generatePackage>
+					<generatePackage>com.currencyconverter.wsdl</generatePackage>
 					<schemas>
 						<schema>
 							<url>https://currencyconverter.azurewebsites.net/Service.svc?wsdl</url>

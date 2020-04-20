@@ -11,7 +11,7 @@ public class SoapMarshaller {
 	  @Bean
 	  public Jaxb2Marshaller marshaller() {
 	    Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
-	    marshaller.setContextPath("com.consumingwebservice.wsdl");
+	    marshaller.setContextPath("com.currencyconverter.wsdl");
 	    return marshaller;
 	  }
 }

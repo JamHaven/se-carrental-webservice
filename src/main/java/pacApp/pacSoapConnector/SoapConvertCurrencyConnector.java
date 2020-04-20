@@ -3,12 +3,12 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
 import org.springframework.ws.soap.client.core.SoapActionCallback;
-import com.consumingwebservice.wsdl.AuthHeader;
-import com.consumingwebservice.wsdl.ConvertCurrenyRequest;
-import com.consumingwebservice.wsdl.GetCurrencyCodesRequest;
-import com.consumingwebservice.wsdl.ObjectFactory;
-import com.consumingwebservice.wsdl.ResponseOfListOfString;
-import com.consumingwebservice.wsdl.ResponseOfString;
+import com.currencyconverter.wsdl.AuthHeader;
+import com.currencyconverter.wsdl.ConvertCurrenyRequest;
+import com.currencyconverter.wsdl.GetCurrencyCodesRequest;
+import com.currencyconverter.wsdl.ObjectFactory;
+import com.currencyconverter.wsdl.ResponseOfListOfString;
+import com.currencyconverter.wsdl.ResponseOfSingle;
 import pacApp.pacSoapConnector.context.SoapMarshaller;
 
 @Service
@@ -46,17 +46,18 @@ public class SoapConvertCurrencyConnector extends WebServiceGatewaySupport {
 		return null;
 	}
 	
-	public String convertCurrency(String value, String toCurrency) {
+	public float convertCurrency(float value,  String fromCurrency, String toCurrency) {
 		setupMarshaller();
 		ObjectFactory factory = new ObjectFactory();
 		ConvertCurrenyRequest ccr = new ConvertCurrenyRequest();
 		ccr.setAutHeader(factory.createConvertCurrenyRequestAutHeader(getRequetsHeader(factory)));
-		ccr.setCcValue(factory.createConvertCurrenyRequestCcValue(value));
-		ccr.setToCurrency(factory.createConvertCurrenyRequestToCurrency(toCurrency));		
-		ResponseOfString response = (ResponseOfString)getWebServiceTemplate()
+		ccr.setFromCurrency(factory.createConvertCurrenyRequestFromCurrency(fromCurrency));
+		ccr.setToCurrency(factory.createConvertCurrenyRequestToCurrency(toCurrency));
+		ccr.setAmount(value);
+		ResponseOfSingle response = (ResponseOfSingle)getWebServiceTemplate()
 				 .marshalSendAndReceive(CURRENCY_SERVICE_ENDPOINTS.serviceUrl, ccr,
 						  new SoapActionCallback(CURRENCY_SERVICE_ENDPOINTS.convertCurrencyUrl));
-		return response.getReturnValue().getValue();
+		return response.getReturnValue();
 	}
 	
 
