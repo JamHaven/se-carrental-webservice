@@ -318,11 +318,46 @@ public class RentalController {
 
     @DeleteMapping("/rental/{id}")
     public ResponseEntity deleteRental(@PathVariable Long id){
-        //TODO: check for user roles
-        //this.repository.deleteById(id);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        GenericResponse response = new GenericResponse(HttpStatus.NOT_FOUND.value(), "Not found");
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        if (!(auth instanceof JwtAuthenticatedProfile)) {
+            //throw new AuthenticationForbiddenException("authentication failure");
+            GenericResponse response = new GenericResponse(HttpStatus.FORBIDDEN.value(),"Authentication failure");
+            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+        }
+
+        JwtAuthenticatedProfile authenticatedProfile = (JwtAuthenticatedProfile) auth;
+        String userEmail = authenticatedProfile.getName();
+
+        Optional<User> optUser = this.userRepository.findOneByEmail(userEmail);
+
+        if (!optUser.isPresent()) {
+            GenericResponse response = new GenericResponse(HttpStatus.BAD_REQUEST.value(),"Invalid user");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        User user = optUser.get();
+
+        //TODO: implement user roles
+
+        long userId = user.getId();
+
+        if (userId != 1L) {
+            GenericResponse response = new GenericResponse(HttpStatus.FORBIDDEN.value(),"Request forbidden");
+            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+        }
+
+        Optional<Rental> optionalRental = this.repository.findById(id);
+
+        if (!optionalRental.isPresent()) {
+            GenericResponse response = new GenericResponse(HttpStatus.NOT_FOUND.value(), "Rental " + id.toString() + " not found");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+
+        this.repository.deleteById(id);
+
+        GenericResponse response = new GenericResponse(HttpStatus.OK.value(),"Rental " + id.toString() + " deleted");
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     protected Booking convertRentalToBooking(Rental rental) {
