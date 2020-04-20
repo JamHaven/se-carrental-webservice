@@ -63,8 +63,8 @@ public class RentalController {
         log.info(auth.getPrincipal().toString());
 
         JwtAuthenticatedProfile authenticatedProfile = (JwtAuthenticatedProfile) auth;
-
         String userEmail = authenticatedProfile.getName();
+
         Optional<User> optUser = this.userRepository.findOneByEmail(userEmail);
 
         if (!optUser.isPresent()) {
@@ -72,6 +72,7 @@ public class RentalController {
         }
 
         User user = optUser.get();
+
         List<Rental> rentals = this.repository.findByUser(user);
         List<Booking> bookings = new Vector<Booking>();
 
@@ -381,8 +382,11 @@ public class RentalController {
     }
 
     protected Booking priceConversionForBooking(Booking booking, String currency) {
-        Float value = Float.valueOf(booking.getPrice().floatValue());
+        if (booking.getPrice() == null) {
+            return booking;
+        }
 
+        Float value = Float.valueOf(booking.getPrice().floatValue());
         Float convertedValue = null;
 
         SoapConvertCurrencyConnector currencyConnector;
