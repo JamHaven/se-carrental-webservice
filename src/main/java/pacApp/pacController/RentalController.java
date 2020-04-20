@@ -67,7 +67,7 @@ public class RentalController {
         String userEmail = authenticatedProfile.getName();
         Optional<User> optUser = this.userRepository.findOneByEmail(userEmail);
 
-        if (!optUser.isPresent()){
+        if (!optUser.isPresent()) {
             throw new AuthenticationForbiddenException("authentication failure");
         }
 
@@ -79,11 +79,11 @@ public class RentalController {
             bookings.add(this.convertRentalToBooking(rental));
         }
 
-        if (user.getDefaultCurrency() == Constants.SERVICE_CURRENCY) {
+        Currency userCurrency = user.getDefaultCurrency();
+
+        if (userCurrency == Constants.SERVICE_CURRENCY) {
             return bookings;
         }
-
-        Currency userCurrency = user.getDefaultCurrency();
 
         bookings = this.priceConversionForBookings(bookings, userCurrency.name());
 
@@ -103,7 +103,7 @@ public class RentalController {
 
         Optional<User> optUser = this.userRepository.findOneByEmail(userEmail);
 
-        if (!optUser.isPresent()){
+        if (!optUser.isPresent()) {
             throw new AuthenticationForbiddenException("authentication failure");
         }
 
@@ -126,11 +126,11 @@ public class RentalController {
 
         Booking booking = this.convertRentalToBooking(rental);
 
-        if (user.getDefaultCurrency() == Constants.SERVICE_CURRENCY) {
+        Currency userCurrency = user.getDefaultCurrency();
+
+        if (userCurrency == Constants.SERVICE_CURRENCY) {
             return new ResponseEntity<>(booking, HttpStatus.OK);
         }
-
-        Currency userCurrency = user.getDefaultCurrency();
 
         booking = this.priceConversionForBooking(booking, userCurrency.name());
 
@@ -240,7 +240,7 @@ public class RentalController {
 
         Optional<User> optUser = this.userRepository.findOneByEmail(userEmail);
 
-        if (!optUser.isPresent()){
+        if (!optUser.isPresent()) {
             GenericResponse response = new GenericResponse(400,"Invalid user");
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
@@ -305,11 +305,11 @@ public class RentalController {
         //return new ResponseEntity<>(rental, HttpStatus.OK);
         Booking bookingResponse = this.convertRentalToBooking(rental);
 
-        if (user.getDefaultCurrency() == Constants.SERVICE_CURRENCY) {
+        Currency userCurrency = user.getDefaultCurrency();
+
+        if (userCurrency == Constants.SERVICE_CURRENCY) {
             return new ResponseEntity<>(bookingResponse, HttpStatus.OK);
         }
-
-        Currency userCurrency = user.getDefaultCurrency();
 
         bookingResponse = this.priceConversionForBooking(bookingResponse, userCurrency.name());
 
@@ -356,7 +356,7 @@ public class RentalController {
             currencyConnector = new SoapConvertCurrencyConnector();
             convertedValue = currencyConnector.convertCurrency(value, Constants.SERVICE_CURRENCY.name(), currency);
         } catch (Exception ex) {
-            log.info(ex.getMessage());
+            log.error(ex.getMessage());
         }
 
         if (convertedValue == null) {

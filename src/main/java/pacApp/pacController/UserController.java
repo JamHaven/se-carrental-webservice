@@ -82,6 +82,15 @@ public class UserController {
         }
 
         User user = optUser.get();
+        User userCopy = null;
+
+        try {
+            userCopy = (User) user.clone();
+        } catch (CloneNotSupportedException ex) {
+            log.error(ex.getMessage());
+        }
+
+        //change user settings
 
         if (userInfo.getDefaultCurrency() != null) {
             String currency = userInfo.getDefaultCurrency();
@@ -96,7 +105,21 @@ public class UserController {
             user.setDefaultCurrency(newDefaultCurrency);
         }
 
-        this.repository.saveAndFlush(user);
+        //save user settings
+
+        user = this.repository.saveAndFlush(user);
+
+        //validate changes
+
+        if (userCopy == null) {
+            GenericResponse response = new GenericResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(),"User update failed");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        if (userCopy.equals(user)) {
+            GenericResponse response = new GenericResponse(HttpStatus.OK.value(),"User settings not changed");
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
 
         GenericResponse response = new GenericResponse(HttpStatus.OK.value(),"User settings updated");
         return new ResponseEntity<>(response, HttpStatus.OK);
