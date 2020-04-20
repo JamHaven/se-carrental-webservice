@@ -28,5 +28,5 @@ jobs:
       with:
         app-name: 'carrental-backend'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_c6d4f6a12e0449c996db3a68686bad6c }}
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_16177ec0758f418f9e4ae0c0a426c438 }}
         package: '${{ github.workspace }}/target/*.jar'
