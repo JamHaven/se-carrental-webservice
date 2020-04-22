@@ -38,7 +38,7 @@ import pacApp.pacSoapConnector.SoapConvertCurrencyConnector;
 
 @RestController
 @Api(value = "CarController", description = "Operations pertaining to Cars in Car Management System")
-public class CarController {
+public class CarController extends BaseRestController {
 
     private static final Logger log = LoggerFactory.getLogger(CarController.class);
     private final CarRepository repository;
@@ -53,15 +53,7 @@ public class CarController {
 
     @GetMapping("/cars")
     public ResponseEntity getAllCars(){
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if (!(auth instanceof JwtAuthenticatedProfile)) {
-            GenericResponse response = new GenericResponse(403, "Authentication failure");
-            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
-        }
-
-        JwtAuthenticatedProfile authenticatedProfile = (JwtAuthenticatedProfile) auth;
-        String userEmail = authenticatedProfile.getName();
+        String userEmail = super.getAuthentication().getName();
 
         Optional<User> optUser = this.userRepository.findOneByEmail(userEmail);
 
@@ -107,15 +99,7 @@ public class CarController {
 
     @GetMapping("/cars/{id}")
     public ResponseEntity getCar(@PathVariable Long id){
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if (!(auth instanceof JwtAuthenticatedProfile)) {
-            GenericResponse response = new GenericResponse(HttpStatus.FORBIDDEN.value(), "Authentication failure");
-            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
-        }
-
-        JwtAuthenticatedProfile authenticatedProfile = (JwtAuthenticatedProfile) auth;
-        String userEmail = authenticatedProfile.getName();
+        String userEmail = super.getAuthentication().getName();
 
         Optional<User> optUser = this.userRepository.findOneByEmail(userEmail);
 
@@ -157,16 +141,7 @@ public class CarController {
 
     @PostMapping("/cars")
     public ResponseEntity saveCar(@RequestBody Car car){
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if (!(auth instanceof JwtAuthenticatedProfile)) {
-            //throw new AuthenticationForbiddenException("authentication failure");
-            GenericResponse response = new GenericResponse(HttpStatus.FORBIDDEN.value(),"Authentication failure");
-            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
-        }
-
-        JwtAuthenticatedProfile authenticatedProfile = (JwtAuthenticatedProfile) auth;
-        String userEmail = authenticatedProfile.getName();
+        String userEmail = super.getAuthentication().getName();
 
         Optional<User> optUser = this.userRepository.findOneByEmail(userEmail);
 
@@ -193,16 +168,7 @@ public class CarController {
 
     @PutMapping("/cars/{id}")
     public ResponseEntity updateCar(@RequestBody Car newCar, @PathVariable Long id){
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if (!(auth instanceof JwtAuthenticatedProfile)) {
-            //throw new AuthenticationForbiddenException("authentication failure");
-            GenericResponse response = new GenericResponse(HttpStatus.FORBIDDEN.value(),"Authentication failure");
-            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
-        }
-
-        JwtAuthenticatedProfile authenticatedProfile = (JwtAuthenticatedProfile) auth;
-        String userEmail = authenticatedProfile.getName();
+        String userEmail = super.getAuthentication().getName();
 
         Optional<User> optUser = this.userRepository.findOneByEmail(userEmail);
 
@@ -244,16 +210,7 @@ public class CarController {
 
     @DeleteMapping("/cars/{id}")
     public ResponseEntity deleteCar(@PathVariable Long id){
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if (!(auth instanceof JwtAuthenticatedProfile)) {
-            //throw new AuthenticationForbiddenException("authentication failure");
-            GenericResponse response = new GenericResponse(HttpStatus.FORBIDDEN.value(),"Authentication failure");
-            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
-        }
-
-        JwtAuthenticatedProfile authenticatedProfile = (JwtAuthenticatedProfile) auth;
-        String userEmail = authenticatedProfile.getName();
+        String userEmail = super.getAuthentication().getName();
 
         Optional<User> optUser = this.userRepository.findOneByEmail(userEmail);
 

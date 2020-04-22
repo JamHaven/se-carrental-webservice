@@ -37,43 +37,6 @@ public class AuthenticationController {
     }
 
     @CrossOrigin
-    @GetMapping("/auth")
-    public ResponseEntity getAllUsers(){
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if (!(auth instanceof JwtAuthenticatedProfile)) {
-            //throw new AuthenticationForbiddenException("authentication failure");
-            GenericResponse response = new GenericResponse(HttpStatus.FORBIDDEN.value(),"Authentication failure");
-            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
-        }
-
-        JwtAuthenticatedProfile authenticatedProfile = (JwtAuthenticatedProfile) auth;
-        String userEmail = authenticatedProfile.getName();
-
-        Optional<User> optUser = this.repository.findOneByEmail(userEmail);
-
-        if (!optUser.isPresent()) {
-            GenericResponse response = new GenericResponse(HttpStatus.BAD_REQUEST.value(),"Invalid user");
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-        }
-
-        User user = optUser.get();
-
-        //TODO: implement user roles
-
-        long userId = user.getId();
-
-        if (userId != 1L) {
-            GenericResponse response = new GenericResponse(HttpStatus.FORBIDDEN.value(),"Request forbidden");
-            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
-        }
-
-        List<User> users = this.repository.findAll();
-
-        return new ResponseEntity<>(users, HttpStatus.OK);
-    }
-
-    @CrossOrigin
     @RequestMapping(value = "/auth", method = RequestMethod.POST,
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)

@@ -16,16 +16,45 @@ import pacApp.pacModel.request.UserInfo;
 import pacApp.pacModel.response.GenericResponse;
 import pacApp.pacSecurity.JwtAuthenticatedProfile;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
-public class UserController {
+public class UserController extends BaseRestController {
 
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
     private final UserRepository repository;
 
     public UserController(UserRepository repository) {
         this.repository = repository;
+    }
+
+    @CrossOrigin
+    @GetMapping("/users")
+    public ResponseEntity getAllUsers(){
+        String userEmail = super.getAuthentication().getName();
+
+        Optional<User> optUser = this.repository.findOneByEmail(userEmail);
+
+        if (!optUser.isPresent()) {
+            GenericResponse response = new GenericResponse(HttpStatus.BAD_REQUEST.value(),"Invalid user");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        User user = optUser.get();
+
+        //TODO: implement user roles
+
+        long userId = user.getId();
+
+        if (userId != 1L) {
+            GenericResponse response = new GenericResponse(HttpStatus.FORBIDDEN.value(),"Request forbidden");
+            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+        }
+
+        List<User> users = this.repository.findAll();
+
+        return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/user", method = RequestMethod.GET,

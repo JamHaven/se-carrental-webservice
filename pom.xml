@@ -10,6 +10,27 @@
 	<groupId>fh</groupId>
 	<artifactId>se</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-starter-parent</artifactId>
+				<version>Greenwich.RELEASE</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<!--
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			-->
+		</dependencies>
+	</dependencyManagement>
 	
 	<dependencies>
 		<dependency>
@@ -21,6 +42,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
+ 
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
 
 		<!-- tag::spring-hateoas[] -->
 		<dependency>
@@ -28,10 +54,28 @@
 			<artifactId>spring-boot-starter-hateoas</artifactId>
 		</dependency>
 		<!-- end::spring-hateoas[] -->
- 
+
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security</artifactId>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter</artifactId>
+		</dependency>
+
+		<!--
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-netflix-eureka-starter</artifactId>
+			<version>2.2.2.RELEASE</version>
+		</dependency>
+		-->
+
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
 		</dependency>
 
 		<dependency>
@@ -99,10 +143,11 @@
 		    <groupId>org.springframework.ws</groupId>
 		    <artifactId>spring-ws-core</artifactId>
 		</dependency>
+
 		<dependency>
 	    	<groupId>com.sun.xml.messaging.saaj</groupId>
 	    	<artifactId>saaj-impl</artifactId>
-	    </dependency>  		
+	    </dependency>
 	</dependencies>
 
 	<build>
@@ -131,12 +176,20 @@
 						</schema>
 					</schemas>
 				</configuration>
-				
 			</plugin>
 		</plugins>
 	</build>
 	
 	<properties>
-  <spring-plugin.version>1.0.0.BUILD-SNAPSHOT</spring-plugin.version>
-</properties>
+  		<spring-plugin.version>1.0.0.BUILD-SNAPSHOT</spring-plugin.version>
+	</properties>
+	<!--
+	<repositories>
+		<repository>
+			<id>spring-milestones</id>
+			<name>Spring Milestones</name>
+			<url>https://repo.spring.io/milestone</url>
+		</repository>
+	</repositories>
+	-->
 </project>

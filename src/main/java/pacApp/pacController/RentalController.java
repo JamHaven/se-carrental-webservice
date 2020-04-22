@@ -36,7 +36,7 @@ import java.util.Vector;
 
 @RestController
 @Api(value = "RentalController", description = "Operations pertaining to Rentals in Car Rental System")
-public class RentalController {
+public class RentalController extends BaseRestController {
 
     private final RentalRepository repository;
     private final UserRepository userRepository;
@@ -51,19 +51,7 @@ public class RentalController {
 
     @GetMapping("/rental")
     public List<Booking> getAllRentals(){
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if (!(auth instanceof JwtAuthenticatedProfile)) {
-            throw new AuthenticationForbiddenException("authentication failure");
-        }
-
-        log.info(auth.toString());
-        log.info(Boolean.toString(auth.isAuthenticated()));
-        log.info(auth.getName());
-        log.info(auth.getPrincipal().toString());
-
-        JwtAuthenticatedProfile authenticatedProfile = (JwtAuthenticatedProfile) auth;
-        String userEmail = authenticatedProfile.getName();
+        String userEmail = super.getAuthentication().getName();
 
         Optional<User> optUser = this.userRepository.findOneByEmail(userEmail);
 
@@ -93,14 +81,7 @@ public class RentalController {
 
     @GetMapping("/rental/{id}")
     public ResponseEntity getRental(@PathVariable Long id){
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if (!(auth instanceof JwtAuthenticatedProfile)) {
-            throw new AuthenticationForbiddenException("authentication failure");
-        }
-
-        JwtAuthenticatedProfile authenticatedProfile = (JwtAuthenticatedProfile) auth;
-        String userEmail = authenticatedProfile.getName();
+        String userEmail = super.getAuthentication().getName();
 
         Optional<User> optUser = this.userRepository.findOneByEmail(userEmail);
 
@@ -142,16 +123,7 @@ public class RentalController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity saveRental(@RequestBody Booking booking){
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if (!(auth instanceof JwtAuthenticatedProfile)) {
-            //throw new AuthenticationForbiddenException("authentication failure");
-            GenericResponse response = new GenericResponse(403,"Authentication failure");
-            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
-        }
-
-        JwtAuthenticatedProfile authenticatedProfile = (JwtAuthenticatedProfile) auth;
-        String userEmail = authenticatedProfile.getName();
+        String userEmail = super.getAuthentication().getName();
 
         Optional<User> optUser = this.userRepository.findOneByEmail(userEmail);
 
@@ -228,16 +200,7 @@ public class RentalController {
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if (!(auth instanceof JwtAuthenticatedProfile)) {
-            //throw new AuthenticationForbiddenException("authentication failure");
-            GenericResponse response = new GenericResponse(403,"Authentication failure");
-            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
-        }
-
-        JwtAuthenticatedProfile authenticatedProfile = (JwtAuthenticatedProfile) auth;
-        String userEmail = authenticatedProfile.getName();
+        String userEmail = super.getAuthentication().getName();
 
         Optional<User> optUser = this.userRepository.findOneByEmail(userEmail);
 
@@ -257,11 +220,6 @@ public class RentalController {
 
         Rental rental = optionalRental.get();
 
-        if (rental.getEndDate() != null) {
-            GenericResponse response = new GenericResponse(400,"Rental already ended");
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-        }
-
         User rentalUser = rental.getUser();
 
         log.info("token user: " + user.getId());
@@ -270,6 +228,11 @@ public class RentalController {
         if (user.getId() != rentalUser.getId()) {
             GenericResponse response = new GenericResponse(401,"Unauthorized");
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+
+        if (rental.getEndDate() != null) {
+            GenericResponse response = new GenericResponse(400,"Rental already ended");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
         long unixTimestamp = Instant.now().getEpochSecond();
@@ -319,16 +282,7 @@ public class RentalController {
 
     @DeleteMapping("/rental/{id}")
     public ResponseEntity deleteRental(@PathVariable Long id){
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if (!(auth instanceof JwtAuthenticatedProfile)) {
-            //throw new AuthenticationForbiddenException("authentication failure");
-            GenericResponse response = new GenericResponse(HttpStatus.FORBIDDEN.value(),"Authentication failure");
-            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
-        }
-
-        JwtAuthenticatedProfile authenticatedProfile = (JwtAuthenticatedProfile) auth;
-        String userEmail = authenticatedProfile.getName();
+        String userEmail = super.getAuthentication().getName();
 
         Optional<User> optUser = this.userRepository.findOneByEmail(userEmail);
 
